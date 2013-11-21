@@ -51,53 +51,39 @@ while (my $line = <$inputFile_fh>) {
   my ($xfold, $chr_state) = (split "-", $splitted[2]);
   if ($xfold == 0) {
     my $window_0f = $splitted[1];
-    #say "~~0f~~ $window_0f";
     push @window_0f, $window_0f;
     my ($m_Dmel_0f, $m_Dyak_0f) = (split "-", $splitted[3]);
-    #say "\$m_Dmel_0f <$m_Dmel_0f>\t\$m_Dyak_0f <$m_Dyak_0f>";
-    #push @m_Dmel_0f, $m_Dmel_0f;
-    #push @m_Dyak_0f, $m_Dyak_0f;
     my ($totalPol_0f, $divergents_0f) = (split "-", $splitted[5]);
-    #say "\$totalPol_0f <$totalPol_0f>\t\$divergents_0f <$divergents_0f>";
-    #push @totalPol_0f, $totalPol_0f;
-    #push @divergents_0f, $divergents_0f;
     (@vectorSFS_0f) =  (split ":", $splitted[8]);
-    #@{ $AoA_0f[$counter_0f] } = @vectorSFS_0f;
 
     $HoH_0f{$window_0f} = {
       "m_Dmel_0f"     => $m_Dmel_0f,
       "m_Dyak_0f"     => $m_Dyak_0f,
       "totalPol_0f"   => $totalPol_0f,
       "divergents_0f" => $divergents_0f,
-      "vectorSFS_0f" => \@vectorSFS_0f,
     };
+    push @{ $HoH_0f{$window_0f}{vectorSFS_0f} }, @vectorSFS_0f;
+
     $counter_0f++;
 
   } elsif ($xfold == 4) {
     my $window_4f = $splitted[1];
-    #say "~~4f~~ $window_4f";
     push @window_4f, $window_4f;
     my ($m_Dmel_4f, $m_Dyak_4f) = (split "-", $splitted[3]);
-    #say "\$m_Dmel_4f <$m_Dmel_4f>\t\$m_Dyak_4f <$m_Dyak_4f>";
-    #push @m_Dmel_4f, $m_Dmel_4f;
-    #push @m_Dyak_4f, $m_Dyak_4f;
     my ($totalPol_4f, $divergents_4f) = (split "-", $splitted[5]);
-    #say "\$totalPol_4f <$totalPol_4f>\t\$divergents_4f <$divergents_4f>";
-    #push @totalPol_4f, $totalPol_4f;
-    #push @divergents_4f, $divergents_4f;
     (@vectorSFS_4f) = (split ":", $splitted[8]);
-    #@{ $AoA_4f[$counter_4f] } = @vectorSFS_4f;
 
     $HoH_4f{$window_4f} = {
       "m_Dmel_4f"     => $m_Dmel_4f,
       "m_Dyak_4f"     => $m_Dyak_4f,
       "totalPol_4f"   => $totalPol_4f,
       "divergents_4f" => $divergents_4f,
-      "vectorSFS_4f" => \@vectorSFS_4f,
+      #"vectorSFS_4f" => @vectorSFS_4f,
     };
+    push @{ $HoH_4f{$window_4f}{vectorSFS_4f} }, @vectorSFS_4f;
+
     $counter_4f++;
   }
-  #say "-"x10;
 }
 
 #say "0";
@@ -118,7 +104,6 @@ my @arr = ( scalar(@window_0f) <= scalar (@window_4f) )     # Ensure to select t
 
 #foreach my $window (@window_0f) {          # This line would mess up things in case: (number of 0f windows) != (number of 4f windows).
 foreach my $window (@arr) {                 # This line works, will traverse all the windows that have 0f and 4f. Discarding those that have one but not the other
-  #say "WINDOW: <$window>";
   my $outputFile = $inputFile . "_DFE-alpha_" . $window;
   open my $outputFile_fh, '>', $outputFile or die "Couldn't open output file '$outputFile' $!\n";
 
@@ -128,30 +113,22 @@ foreach my $window (@arr) {                 # This line works, will traverse all
   say $outputFile_fh "1";
 
   # Print Total Selective
-  #say $outputFile_fh $m_Dyak_0f[$counter_out_0f];
-  #say $outputFile_fh $totalPol_0f[$counter_out_0f];
   say $outputFile_fh $HoH_0f{$window}{totalPol_0f};
 
   # Print Divergents Selective
-  #say $outputFile_fh $divergents_0f[$counter_out_0f];
   say $outputFile_fh $HoH_0f{$window}{divergents_0f};
 
   # Print Total neutral # SUM m_Dyak_4f
-  #say $outputFile_fh $m_Dyak_4f[$counter_out_4f];
-  #say $outputFile_fh $totalPol_4f[$counter_out_4f];
   say $outputFile_fh $HoH_4f{$window}{totalPol_4f};
 
   # Print Divergents Neutral
-  #say $outputFile_fh $divergents_4f[$counter_out_4f];
   say $outputFile_fh $HoH_4f{$window}{divergents_4f};
 
   # Calculate header Selective
   my $sumVectorSFS_0f = 0;
-  #foreach (@{ $AoA_0f[$counter_out_0f] } ) {
   foreach ( @{ $HoH_0f{$window}{vectorSFS_0f} } ) {
     $sumVectorSFS_0f += $_;
   }
-  #my $header_0f = ($m_Dmel_0f[$counter_out_0f]) - $sumVectorSFS_0f;
   my $header_0f = ($HoH_0f{$window}{m_Dmel_0f}) - $sumVectorSFS_0f;
 
   # Print header Selective   # not newline, header followed by SFSselective vector
@@ -161,7 +138,6 @@ foreach my $window (@arr) {                 # This line works, will traverse all
   @final_vectorSFS_0f = ();
   @final_vectorSFS_0f = ( (0) x 128 );    # First, fill vector with 127 zeros!
   foreach my $j ( 0 .. scalar(@{ $HoH_0f{$window}{vectorSFS_0f} })-1 ) {   # Then, fill vector with corresponding values
-    #$final_vectorSFS_0f[$j] = $vectorSFS_0f[$j];
     $final_vectorSFS_0f[$j] = $HoH_0f{$window}{vectorSFS_0f}[$j];
   }
 
@@ -173,11 +149,9 @@ foreach my $window (@arr) {                 # This line works, will traverse all
 
   # Calculate header Neutral
   my $sumVectorSFS_4f = 0;
-  #foreach ( @{ $AoA_4f[$counter_out_4f] } ) {
   foreach ( @{ $HoH_4f{$window}{vectorSFS_4f} } ) {
     $sumVectorSFS_4f += $_;
   }
-  #my $header_4f = ($m_Dmel_4f[$counter_out_4f]) - $sumVectorSFS_4f;
   my $header_4f = ($HoH_4f{$window}{m_Dmel_4f}) - $sumVectorSFS_4f;
 
   # Print header Neutral   # not newline, header followed by SFSselective vector
@@ -186,9 +160,7 @@ foreach my $window (@arr) {                 # This line works, will traverse all
   # Format Neutral SFS vector
   @final_vectorSFS_4f = ();
   @final_vectorSFS_4f = ( (0) x 128 );    # First, fill vector with 127 zeros!
-  #foreach my $k ( 0 .. scalar(@vectorSFS_4f)-1 ) {   # Then, fill vector with corresponding values
   foreach my $k ( 0 .. scalar(@{ $HoH_4f{$window}{vectorSFS_4f} })-1 ) {   # Then, fill vector with corresponding values
-    #$final_vectorSFS_4f[$k] = $vectorSFS_4f[$k];
     $final_vectorSFS_0f[$k] = $HoH_0f{$window}{vectorSFS_0f}[$k];
   }
   # Print Neutral SFS vector
