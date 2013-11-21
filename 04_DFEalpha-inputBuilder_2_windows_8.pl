@@ -78,7 +78,6 @@ while (my $line = <$inputFile_fh>) {
       "m_Dyak_4f"     => $m_Dyak_4f,
       "totalPol_4f"   => $totalPol_4f,
       "divergents_4f" => $divergents_4f,
-      #"vectorSFS_4f" => @vectorSFS_4f,
     };
     push @{ $HoH_4f{$window_4f}{vectorSFS_4f} }, @vectorSFS_4f;
 
@@ -161,7 +160,7 @@ foreach my $window (@arr) {                 # This line works, will traverse all
   @final_vectorSFS_4f = ();
   @final_vectorSFS_4f = ( (0) x 128 );    # First, fill vector with 127 zeros!
   foreach my $k ( 0 .. scalar(@{ $HoH_4f{$window}{vectorSFS_4f} })-1 ) {   # Then, fill vector with corresponding values
-    $final_vectorSFS_0f[$k] = $HoH_0f{$window}{vectorSFS_0f}[$k];
+    $final_vectorSFS_4f[$k] = $HoH_4f{$window}{vectorSFS_4f}[$k];
   }
   # Print Neutral SFS vector
   foreach (@final_vectorSFS_4f) {
